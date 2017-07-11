@@ -4,31 +4,34 @@ using System.Collections.Generic;
 
 public class PhysicsEngine : MonoBehaviour {
 
-	public float mass;
+	[Tooltip ("Kg")]
+	public float mass;					
 	public bool showTrails = true;
+	[Tooltip ("m s^1")]
 	public Vector3 velocityVector;
+	[Tooltip("N [kg m s^-2]")]
 	public Vector3 netForceVector;
 
-	//private List <Vector3> forceVectorList = new List <Vector3>(); 
-	/*public List<Vector3> forceList {
-		get {
-			return forceVectorList;
-		}
-	}*/
-
-	private Vector3[] forceVectorList;
-	public Vector3[] forceList {
+	private List <Vector3> forceVectorList = new List <Vector3>(); 
+	public List<Vector3> forceList {
 		get {
 			return forceVectorList;
 		}
 	}
+
+	/*private Vector3[] forceVectorList;
+	public Vector3[] forceList {
+		get {
+			return forceVectorList;
+		}
+	}*/
 
 	private LineRenderer lineRenderer;
 	private int numberOfForces;
 
 	// Use this for initialization
 	void Start () {
-		forceVectorList = gameObject.GetComponents<AddedForce>();
+		//forceVectorList = gameObject.GetComponent<PhysicsEngine>();
 
 		lineRenderer = gameObject.AddComponent<LineRenderer>();
 		lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
@@ -39,6 +42,42 @@ public class PhysicsEngine : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+
+	}
+
+	void FixedUpdate ()
+	{
+		SumForces ();
+		RenderTrails();
+		UpdateVelocity();
+		//if (netForceVector == Vector3.zero) {
+		transform.position += velocityVector * Time.deltaTime;
+		//}else{
+			
+		//}
+	}
+
+	public void AddForces (Vector3 forceVector)
+	{
+		forceVectorList.Add(forceVector);
+	}
+
+	void SumForces ()
+	{	
+		netForceVector = Vector3.zero;
+		foreach (Vector3 force in forceVectorList){
+			netForceVector += force;
+		}
+
+		forceVectorList = new List <Vector3>();
+	}
+
+	void UpdateVelocity(){
+		Vector3 accelmotion = netForceVector / mass;
+		velocityVector +=  accelmotion * Time.deltaTime;
+	}
+
+	void RenderTrails(){
 		if (showTrails) {
 			lineRenderer.enabled = true;
 			numberOfForces = forceVectorList.Count;
@@ -52,29 +91,5 @@ public class PhysicsEngine : MonoBehaviour {
 		} else {
 			lineRenderer.enabled = false;
 		}
-	}
-
-	void FixedUpdate ()
-	{
-		AddForces ();
-		UpdateVelocity();
-		//if (netForceVector == Vector3.zero) {
-		transform.position += velocityVector * Time.deltaTime;
-		//}else{
-			
-		//}
-	}
-
-	void AddForces ()
-	{	
-		netForceVector = Vector3.zero;
-		foreach (Vector3 force in forceVectorList){
-			netForceVector += force;
-		}
-	}
-
-	void UpdateVelocity(){
-		Vector3 accelmotion = netForceVector / mass;
-		velocityVector +=  accelmotion * Time.deltaTime;
 	}
 }
