@@ -42,13 +42,13 @@ public class PhysicsEngine : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-
+		RenderTrails();
 	}
 
 	void FixedUpdate ()
 	{
 		SumForces ();
-		RenderTrails();
+
 		UpdateVelocity();
 		//if (netForceVector == Vector3.zero) {
 		transform.position += velocityVector * Time.deltaTime;
