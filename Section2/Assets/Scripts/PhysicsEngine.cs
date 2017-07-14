@@ -29,32 +29,28 @@ public class PhysicsEngine : MonoBehaviour {
 	private LineRenderer lineRenderer;
 	private int numberOfForces;
 
+	private PhysicsEngine[] PhysObjects;
+
+	private const float bigG = 6.673e-11f;
+
 	// Use this for initialization
 	void Start () {
-		//forceVectorList = gameObject.GetComponent<PhysicsEngine>();
-
-		lineRenderer = gameObject.AddComponent<LineRenderer>();
-		lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
-		lineRenderer.SetColors(Color.yellow, Color.yellow);
-		lineRenderer.SetWidth(0.2F, 0.2F);
-		lineRenderer.useWorldSpace = false;
+		SetupThrustTrails ();
+		PhysObjects = GameObject.FindObjectsOfType<PhysicsEngine>();
 	}
 	
 	// Update is called once per frame
 	void Update () {
-		RenderTrails();
+		
 	}
 
 	void FixedUpdate ()
 	{
-		SumForces ();
+		RenderTrails();
+		CalculateGravity ();
+		UpdatePosition();
 
-		UpdateVelocity();
-		//if (netForceVector == Vector3.zero) {
 		transform.position += velocityVector * Time.deltaTime;
-		//}else{
-			
-		//}
 	}
 
 	public void AddForces (Vector3 forceVector)
@@ -62,19 +58,42 @@ public class PhysicsEngine : MonoBehaviour {
 		forceVectorList.Add(forceVector);
 	}
 
-	void SumForces ()
+	void CalculateGravity ()
 	{	
+		foreach (PhysicsEngine physA in PhysObjects) {
+			foreach (PhysicsEngine physB in PhysObjects) {
+				if(physA != physB){
+					Vector3 offset = physA.transform.position - physB.transform.position;
+					float rSquared = Mathf.Pow(offset.magnitude, 2f);
+					float bigF = bigG * ((physA.mass * physB.mass) / rSquared);
+					Vector3 gravityFeltVector = bigF * offset.normalized;
+
+					physA.AddForces(-gravityFeltVector);
+				}
+
+			}
+		}
+	}
+
+	void UpdatePosition(){
 		netForceVector = Vector3.zero;
 		foreach (Vector3 force in forceVectorList){
 			netForceVector += force;
 		}
 
 		forceVectorList = new List <Vector3>();
-	}
 
-	void UpdateVelocity(){
 		Vector3 accelmotion = netForceVector / mass;
 		velocityVector +=  accelmotion * Time.deltaTime;
+	}
+
+	void SetupThrustTrails ()
+	{
+		lineRenderer = gameObject.AddComponent<LineRenderer> ();
+		lineRenderer.material = new Material (Shader.Find ("Sprites/Default"));
+		lineRenderer.SetColors (Color.yellow, Color.yellow);
+		lineRenderer.SetWidth (0.2F, 0.2F);
+		lineRenderer.useWorldSpace = false;
 	}
 
 	void RenderTrails(){
