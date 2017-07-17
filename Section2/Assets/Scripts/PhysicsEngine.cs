@@ -56,13 +56,14 @@ public class PhysicsEngine : MonoBehaviour {
 	public void AddForces (Vector3 forceVector)
 	{
 		forceVectorList.Add(forceVector);
+		Debug.Log("Adding force " + forceVector + " to " + gameObject.name);
 	}
 
 	void CalculateGravity ()
 	{	
 		foreach (PhysicsEngine physA in PhysObjects) {
 			foreach (PhysicsEngine physB in PhysObjects) {
-				if(physA != physB){
+				if(physA != physB && physA != this){
 					Vector3 offset = physA.transform.position - physB.transform.position;
 					float rSquared = Mathf.Pow(offset.magnitude, 2f);
 					float bigF = bigG * ((physA.mass * physB.mass) / rSquared);
