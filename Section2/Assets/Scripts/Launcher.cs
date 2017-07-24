@@ -44,6 +44,7 @@ public class Launcher : MonoBehaviour {
 		ball.transform.position = transform.position;
 		Vector3 ThrustVector = new Vector3 (1,1,0) * maxStrength;
 		ball.GetComponent<PhysicsEngine>().velocityVector = ThrustVector;
+		//ball.GetComponent<PhysicsEngine>().AddForces();
 	}
 
 	void increaseLaunchSpeed ()
